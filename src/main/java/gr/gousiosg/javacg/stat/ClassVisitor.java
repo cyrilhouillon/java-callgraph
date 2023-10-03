@@ -49,7 +49,7 @@ public class ClassVisitor extends EmptyVisitor {
     private ConstantPoolGen constants;
     private String classReferenceFormat;
     private final DynamicCallManager DCManager = new DynamicCallManager();
-    private List<String> methodCalls = new ArrayList<>();
+    private List<MethodCall> methodCalls = new ArrayList<>();
 
     public ClassVisitor(JavaClass jc) {
         clazz = jc;
@@ -93,7 +93,7 @@ public class ClassVisitor extends EmptyVisitor {
         return this;
     }
 
-    public List<String> methodCalls() {
+    public List<MethodCall> methodCalls() {
         return this.methodCalls;
     }
 }

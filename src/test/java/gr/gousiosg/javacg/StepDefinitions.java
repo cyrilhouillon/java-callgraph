@@ -31,9 +31,10 @@ public class StepDefinitions {
 		ByteArrayOutputStream resultBuffer = new ByteArrayOutputStream();
 		System.setOut(new PrintStream(resultBuffer));
 		JCallGraph.main(new String[] { jarFile.getPath() });
-		System.setOut(oldOut);
 
 		result = resultBuffer.toString();
+		System.setOut(oldOut);
+
 	}
 
 	@Then("^the result should contain:$")

@@ -46,15 +46,15 @@ public class MethodVisitor extends EmptyVisitor {
     JavaClass visitedClass;
     private MethodGen mg;
     private ConstantPoolGen cp;
-    private String format;
-    private List<String> methodCalls = new ArrayList<>();
+
+    private MethodCall.From caller;
+    private List<MethodCall> methodCalls = new ArrayList<>();
 
     public MethodVisitor(MethodGen m, JavaClass jc) {
         visitedClass = jc;
         mg = m;
         cp = mg.getConstantPool();
-        format = "M:" + visitedClass.getClassName() + ":" + mg.getName() + "(" + argumentList(mg.getArgumentTypes()) + ")"
-            + " " + "(%s)%s:%s(%s)";
+        caller = new MethodCall.From(visitedClass.getClassName(), mg.getName(), argumentList(mg.getArgumentTypes()) );
     }
 
     private String argumentList(Type[] arguments) {
@@ -68,7 +68,7 @@ public class MethodVisitor extends EmptyVisitor {
         return sb.toString();
     }
 
-    public List<String> start() {
+    public List<MethodCall> start() {
         if (mg.isAbstract() || mg.isNative())
             return Collections.emptyList();
 
@@ -91,27 +91,27 @@ public class MethodVisitor extends EmptyVisitor {
 
     @Override
     public void visitINVOKEVIRTUAL(INVOKEVIRTUAL i) {
-        methodCalls.add(String.format(format,"M",i.getReferenceType(cp),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
+        methodCalls.add( caller.callTo("M",i.getReferenceType(cp).toString(),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
     }
 
     @Override
     public void visitINVOKEINTERFACE(INVOKEINTERFACE i) {
-        methodCalls.add(String.format(format,"I",i.getReferenceType(cp),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
+        methodCalls.add( caller.callTo("I",i.getReferenceType(cp).toString(),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
     }
 
     @Override
     public void visitINVOKESPECIAL(INVOKESPECIAL i) {
-        methodCalls.add(String.format(format,"O",i.getReferenceType(cp),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
+        methodCalls.add( caller.callTo("O",i.getReferenceType(cp).toString(),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
     }
 
     @Override
     public void visitINVOKESTATIC(INVOKESTATIC i) {
-        methodCalls.add(String.format(format,"S",i.getReferenceType(cp),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
+        methodCalls.add( caller.callTo("S",i.getReferenceType(cp).toString(),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
     }
 
     @Override
     public void visitINVOKEDYNAMIC(INVOKEDYNAMIC i) {
-        methodCalls.add(String.format(format,"D",i.getType(cp),i.getMethodName(cp),
+        methodCalls.add( caller.callTo("D",i.getType(cp).toString(),i.getMethodName(cp),
                 argumentList(i.getArgumentTypes(cp))));
     }
 }

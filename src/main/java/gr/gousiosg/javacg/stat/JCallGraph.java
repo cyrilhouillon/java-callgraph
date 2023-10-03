@@ -48,35 +48,22 @@ public class JCallGraph {
 
     public static void main(String[] args) {
 
-        Function<ClassParser, ClassVisitor> getClassVisitor =
-                (ClassParser cp) -> {
-                    try {
-                        return new ClassVisitor(cp.parse());
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                };
 
         try {
-            for (String arg : args) {
+            for (String jarFileName : args) {
 
-                File f = new File(arg);
+                File f = new File(jarFileName);
 
                 if (!f.exists()) {
-                    System.err.println("Jar file " + arg + " does not exist");
+                    System.err.println("Jar file " + jarFileName + " does not exist");
                 }
 
                 try (JarFile jar = new JarFile(f)) {
                     Stream<JarEntry> entries = enumerationAsStream(jar.entries());
 
                     String methodCalls = entries.
-                            flatMap(e -> {
-                                if (e.isDirectory() || !e.getName().endsWith(".class"))
-                                    return (new ArrayList<String>()).stream();
-
-                                ClassParser cp = new ClassParser(arg, e.getName());
-                                return getClassVisitor.apply(cp).start().methodCalls().stream();
-                            }).
+                            flatMap(e -> visitJar(jarFileName, e)).
+                            map(MethodCall::toString).
                             map(s -> s + "\n").
                             reduce(new StringBuilder(),
                                     StringBuilder::append,
@@ -90,6 +77,20 @@ public class JCallGraph {
         } catch (IOException e) {
             System.err.println("Error while processing jar: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private static Stream<MethodCall> visitJar(String jarFileName, JarEntry jarEntry) {
+
+        try {
+            if (jarEntry.isDirectory() || !jarEntry.getName().endsWith(".class"))
+                return Stream.empty();
+
+            ClassParser cp = new ClassParser(jarFileName, jarEntry.getName());
+            return new ClassVisitor(cp.parse()).start().methodCalls().stream();
+
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
