@@ -26,8 +26,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package gr.gousiosg.javacg.stat;
+package gr.gousiosg.javacg.core.inner;
 
+import gr.gousiosg.javacg.core.MethodCall;
 import org.apache.bcel.classfile.Constant;
 import org.apache.bcel.classfile.ConstantPool;
 import org.apache.bcel.classfile.EmptyVisitor;
@@ -38,6 +39,7 @@ import org.apache.bcel.generic.MethodGen;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * The simplest of class visitors, invokes the method visitor class for each
@@ -45,13 +47,16 @@ import java.util.List;
  */
 public class ClassVisitor extends EmptyVisitor {
 
+    private final Consumer<String> classLogger;
+
     private JavaClass clazz;
     private ConstantPoolGen constants;
     private String classReferenceFormat;
     private final DynamicCallManager DCManager = new DynamicCallManager();
     private List<MethodCall> methodCalls = new ArrayList<>();
 
-    public ClassVisitor(JavaClass jc) {
+    public ClassVisitor(Consumer<String> classLogger, JavaClass jc) {
+        this.classLogger = classLogger;
         clazz = jc;
         constants = new ConstantPoolGen(clazz.getConstantPool());
         classReferenceFormat = "C:" + clazz.getClassName() + " %s";

@@ -11,7 +11,7 @@
  *     see <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-package gr.gousiosg.javacg.stat;
+package gr.gousiosg.javacg.core.inner;
 
 import java.util.HashMap;
 import java.util.Map;

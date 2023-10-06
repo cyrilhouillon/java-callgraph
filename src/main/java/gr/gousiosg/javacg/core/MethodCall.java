@@ -1,4 +1,4 @@
-package gr.gousiosg.javacg.stat;
+package gr.gousiosg.javacg.core;
 
 public class MethodCall {
 

@@ -26,8 +26,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package gr.gousiosg.javacg.stat;
+package gr.gousiosg.javacg.core.inner;
 
+import gr.gousiosg.javacg.core.MethodCall;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.generic.*;
 

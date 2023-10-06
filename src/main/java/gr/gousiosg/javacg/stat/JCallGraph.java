@@ -28,15 +28,11 @@
 
 package gr.gousiosg.javacg.stat;
 
-import java.io.*;
-import java.util.*;
-import java.util.function.Function;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import gr.gousiosg.javacg.core.Calls;
+import gr.gousiosg.javacg.core.MethodCall;
 
-import org.apache.bcel.classfile.ClassParser;
+import java.io.*;
+import java.util.jar.JarFile;
 
 /**
  * Constructs a callgraph out of a JAR archive. Can combine multiple archives
@@ -48,6 +44,7 @@ public class JCallGraph {
 
     public static void main(String[] args) {
 
+        Calls calls = new Calls(System.out::println);
 
         try {
             for (String jarFileName : args) {
@@ -59,10 +56,8 @@ public class JCallGraph {
                 }
 
                 try (JarFile jar = new JarFile(f)) {
-                    Stream<JarEntry> entries = enumerationAsStream(jar.entries());
 
-                    String methodCalls = entries.
-                            flatMap(e -> visitJar(jarFileName, e)).
+                    String methodCalls = calls.extractFrom(jar).
                             map(MethodCall::toString).
                             map(s -> s + "\n").
                             reduce(new StringBuilder(),
@@ -80,32 +75,4 @@ public class JCallGraph {
         }
     }
 
-    private static Stream<MethodCall> visitJar(String jarFileName, JarEntry jarEntry) {
-
-        try {
-            if (jarEntry.isDirectory() || !jarEntry.getName().endsWith(".class"))
-                return Stream.empty();
-
-            ClassParser cp = new ClassParser(jarFileName, jarEntry.getName());
-            return new ClassVisitor(cp.parse()).start().methodCalls().stream();
-
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    public static <T> Stream<T> enumerationAsStream(Enumeration<T> e) {
-        return StreamSupport.stream(
-                Spliterators.spliteratorUnknownSize(
-                        new Iterator<T>() {
-                            public T next() {
-                                return e.nextElement();
-                            }
-
-                            public boolean hasNext() {
-                                return e.hasMoreElements();
-                            }
-                        },
-                        Spliterator.ORDERED), false);
-    }
 }
